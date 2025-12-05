@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
+# Health Questionnaire App (Анкета по здоровью)
 
-## Project info
+Многоязычное веб-приложение для сбора анкет по здоровью с поддержкой DSGVO/GDPR, интеграцией с Telegram и поддержкой трех языков (RU, EN, DE).
 
-**URL**: https://lovable.dev/projects/413746bd-bc24-4154-942a-854eb6e290bf
+## 🚀 Возможности
 
-## How can I edit this code?
+- ✅ Многоязычный интерфейс (Русский, Английский, Немецкий)
+- ✅ DSGVO/GDPR соответствие с политикой конфиденциальности
+- ✅ Интеграция с Telegram Bot API для отправки анкет
+- ✅ Четыре типа анкет: для младенцев, детей, женщин и мужчин
+- ✅ Автосохранение данных в localStorage
+- ✅ Валидация форм
+- ✅ Адаптивный дизайн
 
-There are several ways of editing your application.
+## 📋 Требования
 
-**Use Lovable**
+- Node.js 18+ и npm
+- Telegram Bot Token (получить у [@BotFather](https://t.me/BotFather))
+- Telegram Chat ID (получить у [@userinfobot](https://t.me/userinfobot))
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/413746bd-bc24-4154-942a-854eb6e290bf) and start prompting.
+## 🛠️ Установка и запуск
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. Клонирование репозитория
 
-**Use your preferred IDE**
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+cd anketazdoroyou-main
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 2. Установка зависимостей
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+npm install
+```
 
-Follow these steps:
+### 3. Настройка переменных окружения
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Создайте файл `.env` в корне проекта:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```env
+VITE_TELEGRAM_BOT_TOKEN=your_bot_token_here
+VITE_TELEGRAM_CHAT_ID=your_chat_id_here
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Важно:** Не коммитьте файл `.env` в репозиторий! Он уже добавлен в `.gitignore`.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 4. Запуск dev-сервера
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Приложение будет доступно по адресу `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📦 Сборка для продакшена
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Собранные файлы будут в папке `dist/`
 
-## What technologies are used for this project?
+## 🔧 Технологии
 
-This project is built with:
+- **Vite** - сборщик и dev-сервер
+- **React** - UI библиотека
+- **TypeScript** - типизация
+- **Tailwind CSS** - стилизация
+- **shadcn/ui** - UI компоненты
+- **React Router** - маршрутизация
+- **Sonner** - уведомления
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📝 Структура проекта
 
-## How can I deploy this project?
+```
+src/
+├── components/        # React компоненты
+│   ├── form/         # Компоненты форм
+│   └── ui/           # UI компоненты
+├── contexts/         # React контексты
+├── lib/              # Утилиты и данные
+├── pages/            # Страницы приложения
+└── hooks/            # Кастомные хуки
+```
 
-Simply open [Lovable](https://lovable.dev/projects/413746bd-bc24-4154-942a-854eb6e290bf) and click on Share -> Publish.
+## 🔐 Безопасность
 
-## Can I connect a custom domain to my Lovable project?
+- Файл `.env` с токенами не должен попадать в репозиторий
+- Для продакшена рекомендуется использовать серверный прокси для отправки в Telegram
+- Токены Telegram Bot API должны храниться в безопасном месте
 
-Yes, you can!
+## 📄 Лицензия
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+MIT
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 👤 Автор
+
+Создано с помощью [Lovable](https://lovable.dev)
