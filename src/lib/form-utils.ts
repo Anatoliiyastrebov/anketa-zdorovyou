@@ -241,21 +241,33 @@ export const generateMarkdown = (
 // SECURITY NOTE: In production, use environment variables or a server-side proxy
 // Do not expose BOT_TOKEN in client-side code in production!
 // For development: Set VITE_TELEGRAM_BOT_TOKEN and VITE_TELEGRAM_CHAT_ID in .env file
-export const sendToTelegram = async (markdown: string): Promise<boolean> => {
+export const sendToTelegram = async (markdown: string): Promise<{ success: boolean; error?: string }> => {
   // Try to get from environment variables first (for Vite: VITE_ prefix)
   const BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '<TELEGRAM_BOT_TOKEN>';
   const CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID || '<TELEGRAM_CHAT_ID>';
 
   // Validate that tokens are set
   if (BOT_TOKEN === '<TELEGRAM_BOT_TOKEN>' || CHAT_ID === '<TELEGRAM_CHAT_ID>') {
-    console.error('Telegram Bot Token or Chat ID not configured. Please set VITE_TELEGRAM_BOT_TOKEN and VITE_TELEGRAM_CHAT_ID environment variables.');
-    return false;
+    const errorMsg = 'Telegram Bot Token or Chat ID not configured. Please set VITE_TELEGRAM_BOT_TOKEN and VITE_TELEGRAM_CHAT_ID environment variables.';
+    console.error(errorMsg);
+    return { success: false, error: errorMsg };
   }
 
-  // Log payload for debugging (remove in production)
-  console.log('Sending to Telegram...', { chatId: CHAT_ID, textLength: markdown.length });
+  // Log payload for debugging
+  console.log('Sending to Telegram...', { 
+    chatId: CHAT_ID, 
+    textLength: markdown.length,
+    hasToken: !!BOT_TOKEN,
+    hasChatId: !!CHAT_ID
+  });
+
+  // Create AbortController for timeout
+  const controller = new AbortController();
+  let timeoutId: NodeJS.Timeout | null = null;
 
   try {
+    timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     const response = await fetch(
       `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
       {
@@ -268,20 +280,61 @@ export const sendToTelegram = async (markdown: string): Promise<boolean> => {
           text: markdown,
           parse_mode: 'Markdown',
         }),
+        signal: controller.signal,
       }
     );
+
+    if (timeoutId) clearTimeout(timeoutId);
 
     const responseData = await response.json();
 
     if (!response.ok) {
-      console.error('Telegram API error:', responseData);
-      throw new Error(`Telegram API error: ${response.status} - ${JSON.stringify(responseData)}`);
+      const errorMsg = responseData.description || `HTTP ${response.status}`;
+      console.error('Telegram API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: responseData
+      });
+      return { 
+        success: false, 
+        error: `Telegram API error: ${errorMsg}` 
+      };
+    }
+
+    if (!responseData.ok) {
+      const errorMsg = responseData.description || 'Unknown Telegram API error';
+      console.error('Telegram API returned error:', responseData);
+      return { 
+        success: false, 
+        error: `Telegram API error: ${errorMsg}` 
+      };
     }
 
     console.log('Successfully sent to Telegram');
-    return true;
-  } catch (error) {
-    console.error('Error sending to Telegram:', error);
-    return false;
+    return { success: true };
+  } catch (error: any) {
+    if (timeoutId) clearTimeout(timeoutId);
+    
+    let errorMessage = 'Unknown error occurred';
+    
+    if (error.name === 'AbortError') {
+      errorMessage = 'Request timeout. Please check your internet connection and try again.';
+    } else if (error instanceof TypeError && error.message.includes('fetch')) {
+      errorMessage = 'Network error. Please check your internet connection and try again.';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    console.error('Error sending to Telegram:', {
+      error,
+      message: errorMessage,
+      name: error?.name,
+      stack: error?.stack
+    });
+    
+    return { 
+      success: false, 
+      error: errorMessage 
+    };
   }
 };

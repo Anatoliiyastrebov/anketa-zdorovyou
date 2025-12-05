@@ -155,17 +155,25 @@ const Anketa: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const success = await sendToTelegram(markdown);
+      const result = await sendToTelegram(markdown);
       
-      if (success) {
+      if (result.success) {
         clearFormData(type, language);
         navigate(`/success?lang=${language}`);
       } else {
-        toast.error(t('submitError'));
+        // Show detailed error message
+        const errorMsg = result.error || t('submitError');
+        console.error('Failed to send form:', errorMsg);
+        toast.error(errorMsg, {
+          duration: 5000,
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit error:', error);
-      toast.error(t('submitError'));
+      const errorMsg = error?.message || t('submitError');
+      toast.error(errorMsg, {
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
