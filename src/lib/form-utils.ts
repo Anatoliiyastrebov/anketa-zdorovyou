@@ -159,15 +159,10 @@ export const generateMarkdown = (
   let md = `**${headers[type]}**\n`;
 
   let questionNumber = 1;
-  let healthSectionPassed = false;
+  let digestionQuestionPassed = false;
   let isFirstSection = true;
 
   sections.forEach((section) => {
-    // Mark that we've passed the health section
-    if (section.id === 'health') {
-      healthSectionPassed = true;
-    }
-
     // Skip empty sections
     const hasAnswers = section.questions.some((question) => {
       const value = formData[question.id];
@@ -190,9 +185,13 @@ export const generateMarkdown = (
       if (value && (Array.isArray(value) ? value.length > 0 : value.trim() !== '')) {
         const label = question.label[lang];
         
-        // Question number and label - only number questions after "health" section
+        // Question number and label - start numbering from "digestion" question
         let questionPrefix = '';
-        if (healthSectionPassed && section.id !== 'health') {
+        if (question.id === 'digestion') {
+          digestionQuestionPassed = true;
+          questionPrefix = `${questionNumber}. `;
+          questionNumber++;
+        } else if (digestionQuestionPassed) {
           questionPrefix = `${questionNumber}. `;
           questionNumber++;
         }
