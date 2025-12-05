@@ -156,23 +156,32 @@ export const generateMarkdown = (
     man: t.mdMan,
   };
 
-  let md = `\n${'═'.repeat(40)}\n`;
-  md += `  ${headers[type]}\n`;
-  md += `${'═'.repeat(40)}\n\n`;
+  let md = `**${headers[type]}**\n`;
 
   let questionNumber = 1;
   let healthSectionPassed = false;
+  let isFirstSection = true;
 
-  sections.forEach((section, sectionIndex) => {
-    // Section header
-    md += `\n${'─'.repeat(40)}\n`;
-    md += `📋 ${section.title[lang]}\n`;
-    md += `${'─'.repeat(40)}\n\n`;
-
+  sections.forEach((section) => {
     // Mark that we've passed the health section
     if (section.id === 'health') {
       healthSectionPassed = true;
     }
+
+    // Skip empty sections
+    const hasAnswers = section.questions.some((question) => {
+      const value = formData[question.id];
+      return value && (Array.isArray(value) ? value.length > 0 : value.trim() !== '');
+    });
+
+    if (!hasAnswers) return;
+
+    // Section header (compact)
+    if (!isFirstSection) {
+      md += `\n`;
+    }
+    md += `**${section.title[lang]}**\n`;
+    isFirstSection = false;
 
     section.questions.forEach((question) => {
       const value = formData[question.id];
@@ -182,57 +191,47 @@ export const generateMarkdown = (
         const label = question.label[lang];
         
         // Question number and label - only number questions after "health" section
+        let questionPrefix = '';
         if (healthSectionPassed && section.id !== 'health') {
-          md += `${questionNumber}. **${label}**\n`;
+          questionPrefix = `${questionNumber}. `;
           questionNumber++;
-        } else {
-          // Before or in health section, don't number
-          md += `**${label}**\n`;
         }
         
+        // Format answer
+        let answerText = '';
         if (Array.isArray(value)) {
           const optionLabels = value.map((v) => {
             const opt = question.options?.find((o) => o.value === v);
             return opt ? opt.label[lang] : v;
           });
-          md += `   Ответ: `;
-          optionLabels.forEach((ol, idx) => {
-            md += `${ol}`;
-            if (idx < optionLabels.length - 1) {
-              md += `, `;
-            }
-          });
-          md += `\n`;
+          answerText = optionLabels.join(', ');
         } else if (question.options) {
           const opt = question.options.find((o) => o.value === value);
-          md += `   Ответ: ${opt ? opt.label[lang] : value}\n`;
+          answerText = opt ? opt.label[lang] : value;
         } else {
-          md += `   Ответ: ${value}\n`;
+          answerText = value;
         }
 
+        // Compact format: Question: Answer
+        md += `${questionPrefix}${label}: ${answerText}`;
+        
         if (additional && additional.trim() !== '') {
-          md += `   📝 Дополнительно: ${additional}\n`;
+          md += ` (${additional})`;
         }
-
+        
         md += `\n`;
       }
     });
   });
 
-  // Contact section
-  md += `\n${'─'.repeat(40)}\n`;
-  md += `📞 ${t.mdContacts}\n`;
-  md += `${'─'.repeat(40)}\n\n`;
-  
+  // Contact section (compact)
   const cleanUsername = contactData.username.replace(/^@/, '').trim();
   const link = contactData.method === 'telegram'
     ? `https://t.me/${cleanUsername}`
     : `https://instagram.com/${cleanUsername}`;
 
-  md += `👤 Имя пользователя: @${cleanUsername}\n`;
-  md += `🔗 Ссылка: ${link}\n`;
-
-  md += `\n${'═'.repeat(40)}\n`;
+  md += `\n**${t.mdContacts}**\n`;
+  md += `@${cleanUsername} | ${link}\n`;
 
   return md;
 };
