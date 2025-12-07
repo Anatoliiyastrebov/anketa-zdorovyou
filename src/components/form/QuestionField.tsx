@@ -68,7 +68,8 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
             className={`input-field ${error ? 'input-error' : ''}`}
             value={value as string}
             onChange={(e) => onChange(e.target.value)}
-            min="0"
+            min={question.min !== undefined ? question.min : 0}
+            max={question.max !== undefined ? question.max : undefined}
             step="0.1"
           />
         );

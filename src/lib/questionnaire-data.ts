@@ -28,6 +28,8 @@ export interface Question {
     en: string;
     de: string;
   };
+  min?: number;
+  max?: number;
 }
 
 export interface QuestionnaireSection {
@@ -508,10 +510,12 @@ export const childQuestionnaire: QuestionnaireSection[] = [
       {
         id: 'age',
         type: 'number',
-        label: { ru: 'Возраст', en: 'Age', de: 'Alter' },
+        label: { ru: 'Возраст (от 1 до 12 лет)', en: 'Age (1 to 12 years)', de: 'Alter (1 bis 12 Jahre)' },
         icon: 'calendar',
         required: true,
         hasAdditional: false,
+        min: 1,
+        max: 12,
       },
       {
         id: 'weight',

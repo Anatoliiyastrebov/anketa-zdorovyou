@@ -91,6 +91,16 @@ export const validateForm = (
         } else if (question.type === 'number') {
           if (!value || value === '' || isNaN(Number(value))) {
             errors[question.id] = t.required;
+          } else {
+            const numValue = Number(value);
+            if (question.min !== undefined && numValue < question.min) {
+              const minMsg = lang === 'ru' ? `Минимальное значение: ${question.min}` : lang === 'en' ? `Minimum value: ${question.min}` : `Mindestwert: ${question.min}`;
+              errors[question.id] = minMsg;
+            }
+            if (question.max !== undefined && numValue > question.max) {
+              const maxMsg = lang === 'ru' ? `Максимальное значение: ${question.max}` : lang === 'en' ? `Maximum value: ${question.max}` : `Maximalwert: ${question.max}`;
+              errors[question.id] = maxMsg;
+            }
           }
         } else {
           if (!value || (typeof value === 'string' && value.trim() === '')) {
